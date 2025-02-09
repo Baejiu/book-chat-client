@@ -1,7 +1,8 @@
 export default class HttpClient {
-  constructor(baseURL, authErrorEventBus) {
+  constructor(baseURL, authErrorEventBus, getCsrfToken) {
     this.baseURL = baseURL;
     this.authErrorEventBus = authErrorEventBus;
+    this.getCsrfToken = getCsrfToken;
   }
   async fetch(url, options) {
     const res = await fetch(`${this.baseURL}${url}`, {
@@ -9,7 +10,9 @@ export default class HttpClient {
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
+        '_csrf-token': this.getCsrfToken(),
       },
+      credentials: 'include',
     });
     let data;
     try {

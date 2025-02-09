@@ -1,11 +1,10 @@
 export default class AuthService {
-  constructor(http, tokenStorage) {
+  constructor(http) {
     this.http = http;
-    this.tokenStorage = tokenStorage;
   }
 
   async signup(nickname, password, name, email, url) {
-    const data = await this.http.fetch('/auth/signup', {
+    return await this.http.fetch('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({
         nickname,
@@ -15,27 +14,30 @@ export default class AuthService {
         url,
       }),
     });
-    this.tokenStorage.saveToken(data.token);
-    return data;
   }
   async login(nickname, password) {
-    const data = await this.http.fetch(`/auth/login`, {
+    return await this.http.fetch(`/auth/login`, {
       method: 'POST',
       body: JSON.stringify({ nickname, password }),
     });
-    this.tokenStorage.saveToken(data.token);
-    return data;
   }
 
   async me() {
-    const token = this.tokenStorage.getToken();
     return this.http.fetch('/auth/me', {
       method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
     });
   }
 
   async logout() {
-    this.tokenStorage.clearToken();
+    return this.http.fetch('/auth/logout', {
+      method: 'POST',
+    });
+  }
+
+  async csrfToken() {
+    const res = await this.http.fetch('/auth/csrf-token', {
+      method: 'GET',
+    });
+    return res.csrfToken;
   }
 }
